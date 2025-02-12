@@ -22,35 +22,48 @@ I removed references to the fact that the user will be guiding the conversation 
 6. Updated the filename format to include both model names and a timestamp.
 7. Implemented logging to BackroomLogs.
 8. Added support for the o1-mini model.
+9. Updated API key checks to only require keys for the selected models.
+10. Changed the default maximum number of turns to infinity.
+
+## Setup
+- Copy .env.example to .env
+- Add your Anthropic and/or OpenAI API keys to the .env file, depending on which models you plan to use.
+- Install packages.  ```pip install -r requirements.txt```
 
 ## To Run
+For a default conversation using Opus for both roles:
 ```
-python backrooms.py 
-python backrooms.py --lm opus gpt4o 
+python backrooms.py
 ```
 
-You can mix and match any combination of models for the first and second LM (explorer and CLI roles for the CLI target) roles:
+For a conversation between different models:
+```
+python backrooms.py --lm opus gpt4o
+```
+
+You can mix and match any combination of models for the LM roles:
 - opus
 - sonnet
 - gpt4o
 - o1-preview
 - o1-mini
 
-If you don't specify models, it defaults to using opus for both roles.
+If you don't specify models, it defaults to using two Opus models. You can specify as many models as you want for n-way conversations, as long as your chosen template supports it.
 
 ## Templates
 You can choose from the following conversation templates using the `--template` argument:
 - cli (default)
+- student
 - science
 - fugue
 - gallery
-- student
 - ethics
 
-Example:
 ```
-python backrooms.py --lm1 sonnet --lm2 gpt4o --template ethics
+python backrooms.py --lm gpt4o opus --template student 
 ```
+
+Note: Make sure your chosen template supports the number of models you specify.
 
 ## Logging
 The script now logs conversations to folders within a main "BackroomsLogs" directory:
@@ -72,3 +85,33 @@ The conversation temperature is set to 1.0 for both models.
 - For Claude models (opus and sonnet), the max_tokens is set to 1024.
 - For GPT-4 models, the max_tokens is set to 1024.
 - For O1 models (o1-preview and o1-mini), the max_completion_tokens is set to 8192.
+
+## Maximum Turns
+The default number of turns is now set to infinity, allowing the conversation to continue indefinitely. You can still set a specific limit using the `--max-turns` argument.
+
+Example to set a limit of 20 turns:
+```
+python backrooms.py --max-turns 20
+```
+
+## To Run with World Interface
+To use the CLI template with the world interface (which provides note-taking and other capabilities):
+
+1. Clone and start the world interface server:
+```bash
+git clone https://github.com/scottviteri/world-interface
+cd world-interface
+npm install
+npm start
+```
+
+2. In a new terminal, from the UniversalBackrooms directory, run either:
+```bash
+# For GPT-4 exploring the CLI
+python backrooms.py --lm gpt4o cli --template cli_with_world_interface
+
+# For Claude Opus exploring the CLI
+python backrooms.py --lm opus cli --template cli_with_world_interface
+```
+
+This will create a new database for each conversation session when using the CLI template.
